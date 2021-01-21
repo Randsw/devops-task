@@ -1,5 +1,5 @@
 ---
-- hosts: test_server
+- hosts: testserver
   become: yes
 
   vars_files:
