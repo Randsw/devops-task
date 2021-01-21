@@ -1,0 +1,24 @@
+---
+- name: Update system
+  package:
+    name: '*'
+    state: present
+
+- name: Install ssh-server
+  apt:
+    name: "{{ ssh_server }}"
+    state: present
+
+- name: Changing ssh listen port
+  replace:
+    path: "/etc/ssh/sshd_config"
+    regexp: '^.*Port\s\d+'
+    replace: "Port {{ new_ssh_port }}"
+  notify: Restart ssh server
+
+- name: Disable ssh root login
+  replace:
+    path: "/etc/ssh/sshd_config"
+    regexp: "^.*PermitRootLogin.*"
+    replace: "PermitRootLogin no"
+  notify: Restart ssh server

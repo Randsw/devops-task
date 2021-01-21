@@ -1,0 +1,4 @@
+---
+new_ssh_port: '22'
+ssh_server: openssh-server
+ssh_service: sshd

@@ -1,0 +1,8 @@
+---
+package: monit
+monit_port: 2812
+httpd_config:
+  '# set httpd': 'set httpd port {{ monit_port }}'
+  '#     use address localhost': 'use address localhost'
+  '#     allow localhost': 'allow localhost'
+  '#     allow admin:monit': 'allow devops:test'

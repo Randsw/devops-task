@@ -1,0 +1,6 @@
+---
+- name: Reload Nginx
+  systemd:
+    state: restarted
+    enabled: yes
+    name: "{{ package }}"

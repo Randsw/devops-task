@@ -1,0 +1,27 @@
+---
+- name: Update system
+  package:
+    name: '*'
+    state: present
+
+- name: Install monit
+  apt:
+    name: "{{ package }}"
+    state: present
+
+- name: Replace httpd monit config line
+  lineinfile:
+    path: /etc/monit/monitrc
+    regexp: '{{ item.key }}'
+    line: '{{ item.value }}'
+  loop: "{{ httpd_config | dict2items }}"
+  notify: Restart Monit service
+
+- name: Add nginx monitoring config
+  blockinfile:
+    path: /etc/monit/monitrc
+    block: |
+      check process nginx with pidfile /var/run/nginx.pid
+            start program = "/etc/init.d/nginx start"
+            stop program = "/etc/init.d/nginx stop"
+  notify: Restart Monit service

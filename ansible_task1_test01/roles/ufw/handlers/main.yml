@@ -1,0 +1,10 @@
+---
+- name: Reload UFW
+  systemd:
+    state: restarted
+    enabled: yes
+    name: ufw
+
+# - name: Reload UFW
+#   ufw:
+#     state: reloaded

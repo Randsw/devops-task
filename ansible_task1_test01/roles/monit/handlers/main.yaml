@@ -1,0 +1,6 @@
+---
+- name: Restart Monit service
+  systemd:
+    state: restarted
+    enabled: yes
+    name: "{{ package }}"

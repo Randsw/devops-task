@@ -1,0 +1,39 @@
+---
+- name: Update system
+  package:
+    name: '*'
+    state: present
+
+- name: Install ufw
+  apt:
+    name: ufw
+    state: present
+
+- name: Enable UFW
+  ufw:
+    state: enabled
+
+- name: Allow ssh port
+  ufw:
+    rule: allow
+    port: "{{ new_ssh_port }}"
+  notify: Reload UFW
+
+- name: Allow http port
+  ufw:
+    rule: allow
+    port: "{{ http_port }}"
+    proto: tcp
+  notify: Reload UFW
+
+- name: Enable outgoing traffic
+  ufw:
+    policy: allow
+    direction: outgoing
+  notify: Reload UFW
+
+- name: Disable incoming traffic
+  ufw:
+    policy: deny
+    direction: incoming
+  notify: Reload UFW

@@ -1,0 +1,30 @@
+---
+- name: Update system
+  package:
+    name: '*'
+    state: present
+
+- name: Install nginx
+  apt:
+    name: "{{ package }}"
+    state: present
+
+- name: Add nginx server config
+  template:
+    src: nginx.j2
+    dest: /etc/nginx/sites-available/proxy
+    owner: www-data
+    group: www-data
+    mode: '0644'
+
+- name: Remove symlink
+  file:
+    path: "/etc/nginx/sites-enabled/default"
+    state: absent
+
+- name: Create nginx server link
+  file:
+    src: /etc/nginx/sites-available/proxy
+    dest: /etc/nginx/sites-enabled/proxy
+    state: link
+  notify: Reload Nginx

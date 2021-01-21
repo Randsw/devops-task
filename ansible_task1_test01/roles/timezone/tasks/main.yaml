@@ -1,0 +1,9 @@
+---
+- name: Find timezone
+  command: timedatectl
+  register: timedate_output
+  changed_when: false
+
+- name: Set time zone
+  command: timedatectl set-timezone "{{ region }}"/"{{ city }}"
+  when: "city not in timedate_output.stdout"

@@ -1,0 +1,52 @@
+image: "python_ci_lite:1.0"
+
+before_scripts:
+  - python --version
+
+stages:
+  - Static Analysis
+  - Tests
+  - Clean
+
+flake8:
+  stage: Static Analysis
+  tags:
+    - docker
+  script:
+    - flake8 --max-line-lenght=120 *.py
+
+pylint:
+  stage: Static Analysis
+  tags:
+    - docker
+  script:
+    pylint -d C0301 *.py || pylint-exit $?
+
+mypy:
+  stage: Static Analysis
+  tags:
+    - docker
+  script:
+    - python -m mypy .
+
+unit_test:
+  stage: Tests
+  tags:
+    - docker
+  script:
+    - pytest --junitxml=result.xml
+
+  artifacts:
+    paths:
+      - result.xml
+    report: 
+      junit: result.xml
+
+Clean_stage:
+  stage: Clean
+  tags:
+    - docker
+  script:
+    - echo "Cleaning up"
+    - rm -rf root
+  when: always

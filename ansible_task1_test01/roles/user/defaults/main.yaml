@@ -1,0 +1,4 @@
+---
+upassword: $1$SomeSalt$UqddPX3r4kH3UL5jq5/ZI.
+username: serviceuser
+usergroup: sudo

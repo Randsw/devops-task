@@ -1,0 +1,18 @@
+---
+- hosts: test_server
+  become: yes
+
+  vars_files:
+    - test_server_cred.yml 
+
+  vars:
+    ansible_become_pass: '{{ testserver_password }}'
+
+  roles:
+    - timezone
+    - locale
+    - ssh
+    - user
+    - nginx
+    - monit
+    - ufw

@@ -1,0 +1,13 @@
+---
+- name: Ensure a locale exists
+  locale_gen:
+    name: "{{ serv_locale }}"
+    state: present
+
+- name: Update LC_ALL
+  command: update-locale LC_ALL="{{ serv_lc }}"
+  changed_when: false
+
+- name: Update LC_LANG
+  command: update-locale LANGUAGE="{{ serv_lc }}"
+  changed_when: false

@@ -1,0 +1,31 @@
+---
+# Timezone variables
+region: Europe
+city: Moscow
+
+# Locale variables
+serv_locale: en_US.UTF-8
+serv_lc: C.UTF-8
+
+# ssh config variables
+new_ssh_port: '22'
+ssh_server: openssh-server
+ssh_service: sshd
+
+# user config variables
+upassword: {{ serviceuser_pass }} 
+username: serviceuser
+usergroup: sudo
+
+# ngixn config variable
+package: nginx
+monit_port: 2812
+
+# monit config vars
+package: monit
+
+# ufw vars
+http_port: '80'
+
+
+
