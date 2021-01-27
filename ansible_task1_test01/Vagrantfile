@@ -18,4 +18,10 @@ Vagrant.configure("2") do |config|
     ansible.playbook = "test_playbook.yml"
     ansible.ask_vault_pass = true
   end
+  config.vm.provision "testing", type:'ansible' do |ansible|
+    ansible.verbose = "v"
+    ansible.playbook = "testing_playbook.yml"
+
+    ansible.ask_vault_pass = true
+  end
 end
