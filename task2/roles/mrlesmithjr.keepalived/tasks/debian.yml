@@ -1,0 +1,8 @@
+---
+- name: debian | installing packages
+  apt:
+    name: keepalived
+    state: present
+  become: true
+  register: result
+  until: result is succeeded
