@@ -4,28 +4,28 @@ keepalived_config: true
 keepalived_router_info:
   - name: vrrp_1
     master_node: node1
-    router_id: 51
+    router_id: 1
     router_pri_backup: 100
     router_pri_master: 255
     vip_int: "{{ ansible_eth1.device }}"
     vip_addresses:
-      - 192.168.1.102
+      - 10.42.0.102
   - name: vrrp_2
     master_node: node2
-    router_id: 51
+    router_id: 2
     router_pri_backup: 100
     router_pri_master: 255
     vip_int: "{{ ansible_eth1.device }}"
     vip_addresses:
-      - 192.168.1.103
+      - 10.42.0.103
   - name: vrrp_3
     master_node: node3
-    router_id: 51
+    router_id: 3
     router_pri_backup: 100
     router_pri_master: 255
     vip_int: "{{ ansible_eth1.device }}"
     vip_addresses:
-      - 192.168.1.104
+      - 10.42.0.104
 
 # Defines whether sysctl settings should be applied
 keepalived_sysctl_config: true

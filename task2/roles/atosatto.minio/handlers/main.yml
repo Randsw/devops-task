@@ -1,0 +1,7 @@
+---
+
+- name: restart minio
+  service:
+    name: "{{ item.minio_service_name}}"
+    state: restarted
+  loop: "{{ minio_instances }}"

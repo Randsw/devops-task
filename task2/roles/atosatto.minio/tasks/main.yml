@@ -1,0 +1,50 @@
+---
+
+- name: Add sni support to legacy python installations
+  include: python_sni.yml
+  when:
+    - ansible_os_family == 'Debian'
+    - ansible_python_version is version_compare('2.6.0', '>=')
+    - ansible_python_version is version_compare('2.7.9', '<')
+
+- name: Add node name in /etc/hosts
+  blockinfile:
+    path: /etc/hosts
+    block: |
+        node1 192.168.1.25
+        node2 192.168.1.26
+        node3 192.168.1.27
+        node4 192.168.1.28
+        node5 192.168.1.29
+        node6 192.168.1.30
+    insertbefore: "# The following lines are desirable for IPv6 capable hosts"
+ 
+- include: install-server.yml
+  when: minio_install_server
+
+- include: install-client.yml
+  when: minio_install_client
+
+- name: Adding user in the bashrc files
+  lineinfile: 
+    dest: "/home/{{ item }}/.bashrc" 
+    line: "export MINIO_ROOT_USER={{ minio_access_key }}" 
+    insertafter: 'EOF' 
+    state: present
+  loop: 
+    - vagrant
+    - minio  
+
+- name: Adding password in the bashrc files
+  lineinfile: 
+    dest: "/home/{{ item }}/.bashrc" 
+    line: "export MINIO_ROOT_PASSWORD={{ minio_secret_key }}" 
+    insertafter: 'EOF' 
+    state: present
+  loop: 
+    - vagrant
+    - minio
+
+- name: Export enviroment variable for distributed IO
+  shell: "export MINIO_ROOT_USER={{ minio_access_key }} && export MINIO_ROOT_PASSWORD={{ minio_secret_key }}"
+  changed_when: false

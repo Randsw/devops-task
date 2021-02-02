@@ -11,13 +11,18 @@ Vagrant.configure("2") do |config|
      end
      (1..$vm_num).each do |i|
         config.vm.define "node#{i}" do |node|
-            node.vm.network "public_network", ip: "192.168.1.#{24+i}", bridge: "enp3s0"
+            node.vm.network "public_network", ip: "10.42.0.#{24+i}", bridge: "enp3s0"
             node.vm.hostname = "node#{i}"
+            if i < 4
+                node.vm.provision "ansible" do |ansible|
+                    ansible.verbose = "v"
+                    ansible.playbook = "playbook.yml"
+                 end
+            end
         end
-    end   
+    end
     config.vm.provision "ansible" do |ansible|
-       ansible.verbose = "v"
-       ansible.playbook = "playbook.yml"
-       ansible.limit = 'node1, node2, node3'
+        ansible.verbose = "v"
+        ansible.playbook = "minio_playbook.yml"   
     end
 end
