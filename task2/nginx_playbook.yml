@@ -5,4 +5,4 @@
   tasks:
     - name: Include ansible-keepalived
       include_role:
-        name: atosatto.minio
+        name: geerlingguy.nginx

@@ -7,7 +7,6 @@
 vrrp_script {{ chk.name }} {
   script "{{ chk.script }}"
   interval {{ chk.interval }}
-  weight {{ chk.weight }}
 }
 {%         endfor %}
 {%       endif %}

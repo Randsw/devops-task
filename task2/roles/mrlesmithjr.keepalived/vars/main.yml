@@ -3,26 +3,38 @@
 keepalived_config: true
 keepalived_router_info:
   - name: vrrp_1
+    check_script:
+      - name: chk_nginx
+        script: "/usr/bin/pgrep nginx"
+        interval: 2
     master_node: node1
     router_id: 1
-    router_pri_backup: 100
-    router_pri_master: 255
+    router_pri_backup: 149
+    router_pri_master: 250
     vip_int: "{{ ansible_eth1.device }}"
     vip_addresses:
       - 10.42.0.102
   - name: vrrp_2
+    check_script:
+      - name: chk_nginx
+        script: "/usr/bin/pgrep nginx"
+        interval: 2
     master_node: node2
     router_id: 2
-    router_pri_backup: 100
-    router_pri_master: 255
+    router_pri_backup: 149
+    router_pri_master: 250
     vip_int: "{{ ansible_eth1.device }}"
     vip_addresses:
       - 10.42.0.103
   - name: vrrp_3
+    check_script:
+      - name: chk_nginx
+        script: "/usr/bin/pgrep nginx"
+        interval: 2
     master_node: node3
     router_id: 3
-    router_pri_backup: 100
-    router_pri_master: 255
+    router_pri_backup: 149
+    router_pri_master: 250
     vip_int: "{{ ansible_eth1.device }}"
     vip_addresses:
       - 10.42.0.104

@@ -1,0 +1,109 @@
+---
+root_group: root
+nginx_conf_path: /etc/nginx/conf.d
+nginx_conf_file_path: /etc/nginx/nginx.conf
+nginx_mime_file_path: /etc/nginx/mime.types
+nginx_pidfile: /run/nginx.pid
+nginx_vhost_path: /etc/nginx/sites-enabled
+nginx_default_vhost_path: /etc/nginx/sites-enabled/default
+__nginx_user: "www-data"
+
+
+# Used only for Debian/Ubuntu installation, as the -t option for apt.
+nginx_default_release: ""
+
+# Used only for Redhat installation, enables source Nginx repo.
+nginx_yum_repo_enabled: true
+
+# Use the official Nginx PPA for Ubuntu, and the version to use if so.
+nginx_ppa_use: false
+nginx_ppa_version: stable
+
+# The name of the nginx package to install.
+nginx_package_name: "nginx"
+
+nginx_service_state: started
+nginx_service_enabled: true
+
+nginx_conf_template: "nginx.conf.j2"
+nginx_vhost_template: "vhost.j2"
+
+nginx_worker_processes: >-
+  "{{ ansible_processor_vcpus | default(ansible_processor_count) }}"
+nginx_worker_connections: "1024"
+nginx_multi_accept: "off"
+
+nginx_error_log: "/var/log/nginx/error.log warn"
+nginx_access_log: "/var/log/nginx/access.log main buffer=16k flush=2m"
+
+nginx_sendfile: "on"
+nginx_tcp_nopush: "on"
+nginx_tcp_nodelay: "on"
+
+nginx_keepalive_timeout: "65"
+nginx_keepalive_requests: "100"
+
+nginx_server_tokens: "on"
+
+nginx_client_max_body_size: "1000m"
+
+nginx_server_names_hash_bucket_size: "64"
+
+nginx_proxy_cache_path: ""
+
+nginx_extra_conf_options: ""
+# Example extra main options, used within the main nginx's context:
+#   nginx_extra_conf_options: |
+#     env VARIABLE;
+#     include /etc/nginx/main.d/*.conf;
+
+#nginx_extra_http_options: ""
+# Example extra http options, printed inside the main server http config:
+nginx_extra_http_options: |
+  proxy_set_header X-Real-IP $remote_addr;
+  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+  proxy_set_header X-Forwarded-Proto $scheme;
+  proxy_set_header Host $http_host;
+  proxy_connect_timeout 300;
+  proxy_http_version 1.1;
+  proxy_set_header Connection "";
+  chunked_transfer_encoding off;
+
+nginx_remove_default_vhost: true
+nginx_vhosts: 
+  - listen: "80" # default: "80"
+    server_name: "minio.dev"
+    extra_parameters: | # Can be used to add extra config blocks (multiline).
+     location / {
+         proxy_pass http://minio1;
+         }
+     location /photos/ {
+         rewrite ^/photos/(.*)$ /minio/$1  break;
+         proxy_pass http://minio2;
+         }    
+    state: "present" # To remove the vhost configuration.
+
+nginx_upstreams:
+- name: minio1
+  servers: {
+    "10.42.0.25:9091",
+    "10.42.0.26:9091",
+    "10.42.0.27:9091",
+    "10.42.0.28:9091",
+    "10.42.0.29:9091",
+    "10.42.0.30:9091",
+  }
+- name: minio2
+  servers: {
+    "10.42.0.25:9092",
+    "10.42.0.26:9092",
+    "10.42.0.27:9092",
+    "10.42.0.28:9092",
+    "10.42.0.29:9092",
+    "10.42.0.30:9092",
+  }
+
+nginx_log_format: |-
+  '$remote_addr - $remote_user [$time_local] "$request" '
+  '$status $body_bytes_sent "$http_referer" '
+  '"$http_user_agent" "$http_x_forwarded_for"'
