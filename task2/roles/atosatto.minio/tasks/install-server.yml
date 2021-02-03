@@ -20,11 +20,6 @@
     group: "{{ minio_group }}"
     shell: /bin/bash
 
-- name: set dict of combined user name and data storage dir
-  set_fact:
-    users_dir: "{{ users_dir|default([]) | combine( {item.0: item.1 }) }}"
-  loop: "{{ minio_user | zip(minio_server_datadirs) | list }}"
-
 - name: Create the Minio data storage directories
   file:
     path: "{{ item.minio_server_datadirs }}"

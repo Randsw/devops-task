@@ -1,5 +1,6 @@
 ---
 ansible_python_interpreter: /usr/bin/python3
+### VRRP Settings
 keepalived_config: true
 keepalived_router_info:
   - name: vrrp_1
@@ -29,3 +30,168 @@ keepalived_router_info:
 
 # Defines whether sysctl settings should be applied
 keepalived_sysctl_config: true
+
+### S3-like minio storage vars
+---
+go_arch_map:
+  i386: '386'
+  x86_64: 'amd64'
+  aarch64: 'arm64'
+  armv7l: 'arm'
+  armv6l: 'arm6vl'
+
+# Minio binaries path
+minio_server_bin: /usr/local/bin/minio
+minio_client_bin: /usr/local/bin/mc
+
+# Runtime user and group for the Minio server service
+minio_user: minio
+
+minio_group: minio
+
+minio_server_make_datadirs: true
+
+# Switches to enable/disable the Minio server and/or Minio client installation.
+minio_install_server: true
+minio_install_client: false
+
+# Minio access and secret keys
+minio_access_key: "minio"
+minio_secret_key: "miniotest"
+
+
+minio_instances:
+ - name: first
+   minio_server_addr: ":9091"
+   minio_server_datadirs: '/minio-data'
+   minio_server_cluster_nodes:
+    - 'http://{{ ansible_host }}/{{ minio_instances.0.minio_server_datadirs }}'
+    - 'http://{{ ansible_host }}/{{ minio_instances.0.minio_server_datadirs }}'
+    - 'http://{{ ansible_host }}/{{ minio_instances.0.minio_server_datadirs }}'
+    - 'http://{{ ansible_host }}/{{ minio_instances.0.minio_server_datadirs }}'
+    - 'http://{{ ansible_host }}/{{ minio_instances.0.minio_server_datadirs }}'
+    - 'http://{{ ansible_host }}/{{ minio_instances.0.minio_server_datadirs }}'
+   minio_server_envfile: /etc/default/minio1
+   minio_service: "/etc/systemd/system/minio1.service"
+   minio_service_name: minio1
+ - name: second
+   minio_server_addr: ":9092"
+   minio_server_datadirs: '/minio-data2'
+   minio_server_cluster_nodes:
+    - 'http://{{ ansible_host }}/{{ minio_instances.1.minio_server_datadirs }}'
+    - 'http://{{ ansible_host }}/{{ minio_instances.1.minio_server_datadirs }}'
+    - 'http://{{ ansible_host }}/{{ minio_instances.1.minio_server_datadirs }}'
+    - 'http://{{ ansible_host }}/{{ minio_instances.1.minio_server_datadirs }}'
+    - 'http://{{ ansible_host }}/{{ minio_instances.1.minio_server_datadirs }}'
+    - 'http://{{ ansible_host }}/{{ minio_instances.1.minio_server_datadirs }}'
+   minio_server_envfile: /etc/default/minio2
+   minio_service: "/etc/systemd/system/minio2.service"
+   minio_service_name: minio2
+
+#### NGINX variable
+root_group: root
+nginx_conf_path: /etc/nginx/conf.d
+nginx_conf_file_path: /etc/nginx/nginx.conf
+nginx_mime_file_path: /etc/nginx/mime.types
+nginx_pidfile: /run/nginx.pid
+nginx_vhost_path: /etc/nginx/sites-enabled
+nginx_default_vhost_path: /etc/nginx/sites-enabled/default
+__nginx_user: "www-data"
+
+
+# Used only for Debian/Ubuntu installation, as the -t option for apt.
+nginx_default_release: ""
+
+# Used only for Redhat installation, enables source Nginx repo.
+nginx_yum_repo_enabled: true
+
+# Use the official Nginx PPA for Ubuntu, and the version to use if so.
+nginx_ppa_use: false
+nginx_ppa_version: stable
+
+# The name of the nginx package to install.
+nginx_package_name: "nginx"
+
+nginx_service_state: started
+nginx_service_enabled: true
+
+nginx_conf_template: "nginx.conf.j2"
+nginx_vhost_template: "vhost.j2"
+
+nginx_worker_processes: >-
+  "{{ ansible_processor_vcpus | default(ansible_processor_count) }}"
+nginx_worker_connections: "1024"
+nginx_multi_accept: "off"
+
+nginx_error_log: "/var/log/nginx/error.log warn"
+nginx_access_log: "/var/log/nginx/access.log main buffer=16k flush=2m"
+
+nginx_sendfile: "on"
+nginx_tcp_nopush: "on"
+nginx_tcp_nodelay: "on"
+
+nginx_keepalive_timeout: "65"
+nginx_keepalive_requests: "100"
+
+nginx_server_tokens: "on"
+
+nginx_client_max_body_size: "1000m"
+
+nginx_server_names_hash_bucket_size: "64"
+
+nginx_proxy_cache_path: ""
+
+nginx_extra_conf_options: ""
+# Example extra main options, used within the main nginx's context:
+#   nginx_extra_conf_options: |
+#     env VARIABLE;
+#     include /etc/nginx/main.d/*.conf;
+
+nginx_extra_http_options: |
+  proxy_set_header X-Real-IP $remote_addr;
+  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+  proxy_set_header X-Forwarded-Proto $scheme;
+  proxy_set_header Host $http_host;
+  proxy_connect_timeout 300;
+  proxy_http_version 1.1;
+  proxy_set_header Connection "";
+  chunked_transfer_encoding off;
+
+nginx_remove_default_vhost: true
+nginx_vhosts: 
+  - listen: "80" # default: "80"
+    server_name: "minio.dev"
+    extra_parameters: | # Can be used to add extra config blocks (multiline).
+     location / {
+         proxy_pass http://minio1;
+         }
+     location /photos/ {
+         rewrite ^/photos/(.*)$ /minio/$1  break;
+         proxy_pass http://minio2;
+         }    
+    state: "present" 
+
+nginx_upstreams:
+- name: minio1
+  servers: {
+    "{{ ansible_host }}:9091",
+    "{{ ansible_host }}:9091",
+    "{{ ansible_host }}:9091",
+    "{{ ansible_host }}:9091",
+    "{{ ansible_host }}:9091",
+    "{{ ansible_host }}:9091",
+  }
+- name: minio2
+  servers: {
+    "{{ ansible_host }}:9092",
+    "{{ ansible_host }}:9092",
+    "{{ ansible_host }}:9092",
+    "{{ ansible_host }}:9092",
+    "{{ ansible_host }}:9092",
+    "{{ ansible_host }}:9092",
+  }
+
+nginx_log_format: |-
+  '$remote_addr - $remote_user [$time_local] "$request" '
+  '$status $body_bytes_sent "$http_referer" '
+  '"$http_user_agent" "$http_x_forwarded_for"'
