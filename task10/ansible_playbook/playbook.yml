@@ -1,0 +1,34 @@
+---
+- hosts: all
+  become: yes
+
+  tasks:
+  
+    - name: Include geerlingguy-php
+      include_role:
+        name: geerlingguy.php
+
+    - name: Include geerlingguy-nginx
+      include_role:
+        name: geerlingguy.nginx
+
+    - name: Create webserver
+      copy:
+       dest: "/var/www/html/index.php"
+       content: |
+         <?php phpinfo();?>
+       mode: '644'
+       owner: 'www-data'
+       group: 'www-data'
+
+
+    - name: Include geerlingguy-apache
+      include_role:
+        name: geerlingguy.apache
+
+    - name: Include geerlingguy-haproxy
+      include_role:
+        name: geerlingguy.haproxy
+
+    
+    

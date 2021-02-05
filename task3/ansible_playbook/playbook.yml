@@ -1,0 +1,53 @@
+---
+- hosts: all
+  become: yes
+
+  vars:
+    OPENWEATHER_API_KEY: 5aef38349b46292cb1fdf8a1c37afd35
+    CITY_NAME: Honolulu
+
+  tasks:
+    - name: Include ansible-docker
+      include_role:
+        name: geerlingguy.docker
+
+    - name: create directory with parent directories
+      file:
+        path: /home/vagrant/weather/
+        state: directory
+        owner: vagrant
+        group: vagrant
+
+    - name: Copy files for container creation
+      synchronize:
+        src: ../docker/
+        dest: /home/vagrant/weather/
+
+    - name: Install python pip
+      apt:
+        name: python3-pip
+        state: present    
+    
+    - name: Install docker-py
+      pip:
+        name: docker
+
+    - name: build container image
+      docker_image:
+        name: weather:v0.1
+        build:
+          path: /home/vagrant/weather
+          pull: no
+        source: build
+        state: present
+
+    - name: Start a container
+      docker_container:
+        name: weather
+        image: weather:v0.1
+        state: started
+        auto_remove: yes
+        env:
+            OPENWEATHER_API_KEY: '{{ OPENWEATHER_API_KEY }}'
+            CITY_NAME: '{{ CITY_NAME }}'
+        
