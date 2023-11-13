@@ -3,7 +3,6 @@
   become: yes
 
   tasks:
-  
     - name: Include geerlingguy-php
       include_role:
         name: geerlingguy.php
@@ -20,7 +19,6 @@
        mode: '644'
        owner: 'www-data'
        group: 'www-data'
-
 
     - name: Include geerlingguy-apache
       include_role:
